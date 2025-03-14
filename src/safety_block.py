@@ -22,9 +22,11 @@ class BaseSafetyBlock(Process):
     event_source_name = SAFETY_BLOCK_QUEUE_NAME
     events_q_name = event_source_name
 
-    def __init__(self, queues_dir: QueuesDirectory, log_level = DEFAULT_LOG_LEVEL):
+    def __init__(self, public_key, queues_dir: QueuesDirectory, log_level = DEFAULT_LOG_LEVEL):
         # вызываем конструктор базового класса
         super().__init__()
+        
+        self._public_key = public_key
 
         self._queues_dir = queues_dir
 
@@ -83,31 +85,30 @@ class BaseSafetyBlock(Process):
             pass
 
 
-    def _set_mission(self, mission: Mission):
+    def _set_mission(self, signature, mission: Mission):
         """ установка нового маршрутного задания """
         self._mission = mission
         self._route = Route(points=self._mission.waypoints,
                             speed_limits=self._mission.speed_limits)
 
     @abstractmethod
-    def _set_new_direction(self, direction: float):
+    def _set_new_direction(self, signature, direction: float):
         """ установка нового направления перемещения """
 
     @abstractmethod
-    def _set_new_speed(self, speed: float):
+    def _set_new_speed(self, signature, speed: float):
         """ установка новой скорости """
 
-
     @abstractmethod
-    def _lock_cargo(self, _):
+    def _lock_cargo(self, signature, _):
         """ блокировка грузового отсека """
 
     @abstractmethod
-    def _release_cargo(self, _):
+    def _release_cargo(self, signature, _):
         """ разблокировка грузового отсека """
 
 
-    def _set_new_position(self, position: GeoPoint):
+    def _set_new_position(self, signature, position: GeoPoint):
         """ установка новых координат """
         self._log_message(LOG_DEBUG, f"установка местоположения {position}")
 
@@ -143,7 +144,7 @@ class BaseSafetyBlock(Process):
 
             if event.operation in self._enabled_handlers.keys():
                 handler = self._enabled_handlers[event.operation]
-                handler(event.parameters)
+                handler(event.signature, event.parameters)
             else:
                 self._log_message(LOG_ERROR, f"неизвестная операция: {event}")
 

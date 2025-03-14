@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import List
 from geopy import Point
-
+import json
 
 @dataclass
 class GeoSpecificSpeedLimit:
@@ -24,3 +24,25 @@ class Mission:
     # ограничения скорости на маршруте
     speed_limits: List[GeoSpecificSpeedLimit]
     armed: bool  # поездка разрешена (истина) или запрещена (ложь)
+
+    
+def serialize(mission):
+    """
+    Serialize a route (list of geopy.Point) to a deterministic JSON byte string.
+    Sorting the keys ensures consistent serialization.
+    """
+    mission_data = []
+    for point in mission.waypoints:
+        point_data = {
+            "latitude": point.latitude,
+            "longitude": point.longitude,
+            "altitude": point.altitude if point.altitude is not None else None
+        }
+        mission_data.append(point_data)
+    for speedlimit in mission.speed_limits:
+        speedlimit_data = {
+            "start": speedlimit.waypoint_index,
+            "speedlimit": speedlimit.speed_limit
+        }
+        mission_data.append(speedlimit_data)
+    return json.dumps(mission_data, sort_keys=True).encode('utf-8')
