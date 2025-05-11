@@ -40,15 +40,12 @@ class BlackBox(BaseBlackBox):
         # Проверяем подпись
         is_valid = verify_event_signature(event, self.public_key)
 
-        log_entry = {
-            'event': event,
-            'valid': is_valid
-        }
-
         if not is_valid:
-            log_entry['error'] = 'Invalid signature'
+            return False
+
+        log_entry = event
 
         with open(self.storage_path, 'a') as f:
             f.write(serialize(log_entry).decode("utf-8") + "\n")
 
-        return is_valid
+        return True
