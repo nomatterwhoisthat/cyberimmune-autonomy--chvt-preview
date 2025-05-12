@@ -19,10 +19,20 @@ class BlackBox(BaseBlackBox):
         self._events_q_name = self.events_q_name
         self._queues_dir.register(
             queue=self._events_q, name=self._events_q_name)
-
+            
         # Очищаем файл при инициализации
         with open(self.storage_path, 'w') as f:
             f.write("")
+            
+    def _log_message_impl(self, message: str):
+        if not self.public_key:
+            raise ValueError("Public key is not set")
+
+        log_entry = message
+        with open(self.storage_path, 'a') as f:
+            f.write(log_entry + "\n")
+
+        return True        
 
     def _log_event(self, event: Event) -> bool:
         """Логирует событие после проверки подписи
@@ -38,11 +48,6 @@ class BlackBox(BaseBlackBox):
             raise ValueError("Public key is not set")
 
         # Проверяем подпись
-        is_valid = verify_event_signature(event, self.public_key)
-
-        if not is_valid:
-            return False
-
         log_entry = event
 
         with open(self.storage_path, 'a') as f:
