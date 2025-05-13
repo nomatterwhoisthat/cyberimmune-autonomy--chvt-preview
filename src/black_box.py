@@ -109,7 +109,7 @@ class BaseBlackBox(Process):
             if event.operation == 'log_event':
                 self._log_event(event=event.parameters)
             elif event.operation == 'log_message':
-                self._log_message_impl(message=event.parameters)
+                self._log_message_impl(message=event.signature + ' ' + event.parameters)
 
     def run(self):
         self._log_message(LOG_INFO, "старт блока логгера")
