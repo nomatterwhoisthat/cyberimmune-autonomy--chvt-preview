@@ -1,0 +1,1 @@
+{"__class__": "src.event_types.Event", "__state__": {"destination": "test", "extra_parameters": null, "operation": "ping", "parameters": {"key": "value"}, "signature": null, "source": "shibal"}}
