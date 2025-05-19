@@ -65,6 +65,6 @@ class BlackBox(BaseBlackBox):
         log_entry = event
 
         with open(self.storage_path, 'a', encoding='utf-8') as f:
-            f.write(serialize(log_entry) + "\n")
+            f.write(serialize(log_entry).decode('utf-8') + "\n")
 
         return True
